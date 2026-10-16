@@ -1,0 +1,33 @@
+# Operating System & Environment files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs & Runtime
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Secrets & Environment configs
+.env
+.env.*
+*.env
+
+# Backups & Temp files
+*.bak
+*.tmp
+*.swp
+*~
+
+# IDE & Editor folders
+.vscode/
+.idea/
+
+# Local diagnostic crops & artifacts
+page_11_check.png
+assets/images/hero/logo_crop_hires.png
+assets/images/hero/logo_crop_super.png
+assets/images/hero/temp_hires.png
+assets/images/hero/page11.svg
+assets/images/hero/page1_hi.png
