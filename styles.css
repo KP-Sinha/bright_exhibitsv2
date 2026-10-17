@@ -521,6 +521,27 @@ header.sticky-header {
   gap: 0.75rem;
 }
 
+.hero-badges .badge-pill {
+  padding: 0.5rem 1.1rem;
+  background-color: var(--card);
+  border: 1px solid var(--brand);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--brand);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.hero-badges .badge-pill:hover {
+  background-color: var(--brand);
+  color: var(--primary-foreground);
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px oklch(38% 0.1 20 / 0.18);
+}
+
 .badge-pill {
   padding: 0.5rem 1rem;
   background-color: var(--card);
@@ -544,6 +565,15 @@ header.sticky-header {
   box-shadow: var(--shadow-card);
 }
 
+@keyframes hero-float-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 .hero-art-float {
   position: absolute;
   bottom: -1.25rem;
@@ -555,6 +585,17 @@ header.sticky-header {
   font-weight: 700;
   font-size: 0.95rem;
   box-shadow: var(--shadow-card);
+  will-change: transform;
+  animation: hero-float-bounce 1.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art-float {
+    animation: none !important;
+  }
+  .hero-badges .badge-pill {
+    transition: none !important;
+  }
 }
 
 /* Page Header (Internal pages) */
@@ -1065,3 +1106,122 @@ footer.main-footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* Our Products Carousel Styles */
+.carousel-wrapper {
+  position: relative;
+  margin-top: 1.5rem;
+}
+
+.carousel-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.carousel-slide {
+  flex: 0 0 33.333333%;
+  max-width: 33.333333%;
+  padding: 0 0.75rem;
+  box-sizing: border-box;
+}
+
+.carousel-slide .product-card {
+  height: 100%;
+}
+
+.carousel-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.25rem;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.carousel-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.carousel-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background-color: var(--card);
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.carousel-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px oklch(38% 0.1 20 / 0.15);
+}
+
+.carousel-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background-color: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.carousel-dot.active {
+  background-color: var(--primary);
+  width: 28px;
+}
+
+@media (max-width: 1024px) {
+  .carousel-slide {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 680px) {
+  .carousel-slide {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .carousel-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .carousel-nav-group {
+    justify-content: center;
+  }
+}
+
