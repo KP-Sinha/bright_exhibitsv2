@@ -499,4 +499,59 @@ document.addEventListener('DOMContentLoaded', () => {
       if (canvas) canvas.style.display = 'none';
     }
   }
-});
+
+  // =========================================================
+  // FLOATING BACK TO TOP BUTTON
+  // =========================================================
+  let backToTopBtn = document.getElementById('backToTop');
+  if (!backToTopBtn) {
+    backToTopBtn = document.createElement('button');
+    backToTopBtn.id = 'backToTop';
+    backToTopBtn.className = 'back-to-top';
+    backToTopBtn.type = 'button';
+    backToTopBtn.setAttribute('aria-label', 'Back to top');
+    backToTopBtn.innerHTML = `
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    `;
+    document.body.appendChild(backToTopBtn);
+  }
+
+  let isBackToTopVisible = false;
+  let scrollTicking = false;
+
+  const onScroll = () => {
+    if (!scrollTicking) {
+      window.requestAnimationFrame(() => {
+        const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrolled > 350) {
+          if (!isBackToTopVisible) {
+            backToTopBtn.classList.add('is-visible');
+            isBackToTopVisible = true;
+          }
+        } else {
+          if (isBackToTopVisible) {
+            backToTopBtn.classList.remove('is-visible');
+            isBackToTopVisible = false;
+          }
+        }
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Check initial scroll position on load
+  onScroll();
+
+  backToTopBtn.addEventListener('click', () => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth'
+    });
+  });
+});
