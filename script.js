@@ -350,29 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================
-  // 5. LENIS SMOOTH SCROLL (Only when supported and compatible)
-  // =========================================================
-  if (typeof window.Lenis !== 'undefined' && !prefersReducedMotion && window.innerWidth > 850) {
-    try {
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        smoothTouch: false
-      });
-
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-      requestAnimationFrame(raf);
-    } catch (err) {
-      console.warn('Lenis smooth scroll skipped:', err);
-    }
-  }
-
-  // =========================================================
-  // 6. THREE.JS SPATIAL EXHIBITION HERO SCENE
+  // 5. THREE.JS SPATIAL EXHIBITION HERO SCENE (Optimized & Pausable)
   // =========================================================
   const canvas = document.getElementById('hero-3d-canvas');
   if (canvas && typeof THREE !== 'undefined' && !prefersReducedMotion) {
@@ -382,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const camera = new THREE.PerspectiveCamera(
         45,
-        container.clientWidth / container.clientHeight,
+        container.clientWidth / Math.max(container.clientHeight, 1),
         0.1,
         1000
       );
@@ -391,10 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         alpha: true,
-        antialias: true,
-        powerPreference: 'high-performance'
+        antialias: false,
+        powerPreference: 'low-power'
       });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
       renderer.setSize(container.clientWidth, container.clientHeight);
 
       // Exhibition Lighting Rig & Geometric Spatial Frames
@@ -402,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
       scene.add(group);
 
       // Primary Warm Terracotta / Copper Ring Frame
-      const torusGeometry = new THREE.TorusGeometry(12, 0.28, 16, 80);
+      const torusGeometry = new THREE.TorusGeometry(12, 0.28, 12, 60);
       const torusMaterial = new THREE.MeshBasicMaterial({
         color: 0xc85a32,
         wireframe: true,
@@ -425,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
       group.add(icoMesh);
 
       // Ambient Glowing Particles representing exhibition spotlights & lighting dust
-      const particleCount = 45;
+      const particleCount = 35;
       const particleGeometry = new THREE.BufferGeometry();
       const positions = new Float32Array(particleCount * 3);
 
@@ -458,8 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const onMouseMove = (e) => {
         const windowHalfX = window.innerWidth / 2;
         const windowHalfY = window.innerHeight / 2;
-        mouseX = (e.clientX - windowHalfX) * 0.0006;
-        mouseY = (e.clientY - windowHalfY) * 0.0006;
+        mouseX = (e.clientX - windowHalfX) * 0.0004;
+        mouseY = (e.clientY - windowHalfY) * 0.0004;
       };
       window.addEventListener('mousemove', onMouseMove, { passive: true });
 
@@ -468,47 +446,54 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
         const width = container.clientWidth;
         const height = container.clientHeight;
-        camera.aspect = width / height;
+        camera.aspect = width / Math.max(height, 1);
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
       };
       window.addEventListener('resize', onResize, { passive: true });
 
-      // Pause rendering when hero is scrolled out of viewport
+      // Animation Loop with complete stop when offscreen
       let isHeroVisible = true;
-      if ('IntersectionObserver' in window) {
-        const heroObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            isHeroVisible = entry.isIntersecting;
-          });
-        });
-        heroObserver.observe(container);
-      }
+      let animationFrameId = null;
 
-      // Animation Loop with restrained, elegant movement
-      let animationFrameId;
-      const animate = () => {
-        animationFrameId = requestAnimationFrame(animate);
-
-        if (!isHeroVisible) return;
+      const renderLoop = () => {
+        if (!isHeroVisible) {
+          animationFrameId = null;
+          return;
+        }
 
         targetX += (mouseX - targetX) * 0.05;
         targetY += (mouseY - targetY) * 0.05;
 
-        torus.rotation.x += 0.002;
-        torus.rotation.y += 0.003;
+        torus.rotation.x += 0.0015;
+        torus.rotation.y += 0.002;
 
-        icoMesh.rotation.x -= 0.0015;
-        icoMesh.rotation.y += 0.002;
+        icoMesh.rotation.x -= 0.001;
+        icoMesh.rotation.y += 0.0015;
 
-        particleSystem.rotation.y += 0.0008;
+        particleSystem.rotation.y += 0.0006;
 
-        group.rotation.y = targetX * 1.5;
-        group.rotation.x = targetY * 1.5;
+        group.rotation.y = targetX * 1.2;
+        group.rotation.x = targetY * 1.2;
 
         renderer.render(scene, camera);
+        animationFrameId = requestAnimationFrame(renderLoop);
       };
-      animate();
+
+      if ('IntersectionObserver' in window) {
+        const heroObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            isHeroVisible = entry.isIntersecting;
+            if (isHeroVisible && !animationFrameId) {
+              animationFrameId = requestAnimationFrame(renderLoop);
+            }
+          });
+        }, { threshold: 0.05 });
+        heroObserver.observe(container);
+      }
+
+      // Initial start
+      animationFrameId = requestAnimationFrame(renderLoop);
     } catch (e) {
       console.warn('Three.js hero canvas skipped:', e);
       if (canvas) canvas.style.display = 'none';
